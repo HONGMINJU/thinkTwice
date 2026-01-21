@@ -64,7 +64,6 @@ export const ExploreScreen: React.FC = () => {
             <TouchableOpacity key={dimension.id} style={styles.categoryCard}>
               <Text style={styles.categoryIcon}>{dimension.icon}</Text>
               <Text style={styles.categoryName}>{dimension.name}</Text>
-              <Text style={styles.categoryNameEn}>{dimension.nameEn}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -220,33 +219,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginTop: spacing.sm,
+    justifyContent: 'space-between',
   },
   categoryCard: {
-    width: '23%',
-    aspectRatio: 1,
+    width: '18%',
     backgroundColor: colors.background.card,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: '2%',
+    paddingVertical: spacing.sm,
     marginBottom: spacing.sm,
     ...shadows.sm,
   },
   categoryIcon: {
-    fontSize: 24,
-    marginBottom: spacing.xs,
+    fontSize: 18,
+    marginBottom: 2,
   },
   categoryName: {
     ...typography.caption,
     color: colors.text.primary,
     textAlign: 'center',
-    fontSize: 10,
-  },
-  categoryNameEn: {
-    ...typography.caption,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    fontSize: 8,
+    fontSize: 9,
   },
   issueCard: {
     marginBottom: spacing.md,
