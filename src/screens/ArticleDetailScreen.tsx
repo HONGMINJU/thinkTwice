@@ -7,10 +7,12 @@ import {
   Switch,
   SafeAreaView,
   TouchableOpacity,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
-import { Header, Button, Card } from '../components/common';
+import { Header, Button, ValueSlider } from '../components/common';
 import { colors, typography, spacing, borderRadius, shadows } from '../styles';
 import { RootStackParamList } from '../types';
 import { getDimensionById } from '../constants/valueDimensions';
@@ -91,13 +93,12 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({
 }) => {
   const [isEssenceMode, setIsEssenceMode] = useState(false);
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedValue, setSelectedValue] = useState(50);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const { issueId } = route.params;
 
   const dimension = getDimensionById('tech_ethics');
-
-  const handleThinkPress = () => {
-    navigation.navigate('BalancePick', { issueId });
-  };
 
   const getStanceColor = (stance: 'left' | 'right' | 'neutral') => {
     switch (stance) {
@@ -112,6 +113,22 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({
 
   const toggleArticle = (id: string) => {
     setExpandedArticle(expandedArticle === id ? null : id);
+  };
+
+  const handleThinkPress = () => {
+    setShowModal(true);
+  };
+
+  const handleSubmit = () => {
+    setHasSubmitted(true);
+    setShowModal(false);
+    // TODO: 저장 로직
+  };
+
+  const getResultLabel = () => {
+    if (selectedValue < 35) return dimension?.leftValue.label + '을(를) 중시';
+    if (selectedValue > 65) return dimension?.rightValue.label + '을(를) 중시';
+    return '균형 잡힌 시각';
   };
 
   return (
@@ -243,15 +260,79 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({
 
         <View style={styles.divider} />
 
-        <View style={styles.actionContainer}>
-          <Button
-            title="💭 나의 생각 정리하기"
-            onPress={handleThinkPress}
-            variant="primary"
-            size="large"
-          />
-        </View>
+        {hasSubmitted ? (
+          <View style={styles.resultContainer}>
+            <Text style={styles.resultTitle}>✅ 나의 선택</Text>
+            <Text style={styles.resultLabel}>{getResultLabel()}</Text>
+            <View style={styles.resultBar}>
+              <View style={[styles.resultFill, { width: `${selectedValue}%` }]} />
+              <View style={[styles.resultMarker, { left: `${selectedValue}%` }]} />
+            </View>
+            <View style={styles.resultLabels}>
+              <Text style={styles.resultValueLabel}>{dimension?.leftValue.label}</Text>
+              <Text style={styles.resultValueLabel}>{dimension?.rightValue.label}</Text>
+            </View>
+            <TouchableOpacity onPress={() => setShowModal(true)}>
+              <Text style={styles.editButton}>다시 선택하기</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.actionContainer}>
+            <Button
+              title="💭 생각해보기"
+              onPress={handleThinkPress}
+              variant="primary"
+              size="large"
+            />
+          </View>
+        )}
       </ScrollView>
+
+      {/* 생각해보기 모달 */}
+      <Modal
+        visible={showModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>💭 생각해보기</Text>
+              <Pressable onPress={() => setShowModal(false)}>
+                <Text style={styles.modalClose}>✕</Text>
+              </Pressable>
+            </View>
+
+            <Text style={styles.modalQuestion}>
+              이 이슈에서 당신이 더 중요하게{'\n'}여기는 가치는 무엇인가요?
+            </Text>
+
+            <View style={styles.modalDimensionBadge}>
+              <Text style={styles.modalDimensionIcon}>{dimension?.icon}</Text>
+              <Text style={styles.modalDimensionName}>{dimension?.name}</Text>
+            </View>
+
+            <View style={styles.modalSlider}>
+              <ValueSlider
+                value={selectedValue}
+                onValueChange={setSelectedValue}
+                leftLabel={dimension?.leftValue.label || ''}
+                rightLabel={dimension?.rightValue.label || ''}
+                leftDescription={dimension?.leftValue.description}
+                rightDescription={dimension?.rightValue.description}
+              />
+            </View>
+
+            <Button
+              title="선택 완료"
+              onPress={handleSubmit}
+              variant="primary"
+              size="large"
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -461,5 +542,111 @@ const styles = StyleSheet.create({
   },
   actionContainer: {
     marginTop: spacing.md,
+  },
+  resultContainer: {
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    ...shadows.sm,
+  },
+  resultTitle: {
+    ...typography.subtitle,
+    color: colors.text.primary,
+    marginBottom: spacing.sm,
+  },
+  resultLabel: {
+    ...typography.body,
+    color: colors.accent.primary,
+    fontWeight: '600',
+    marginBottom: spacing.md,
+  },
+  resultBar: {
+    height: 8,
+    backgroundColor: colors.border.light,
+    borderRadius: borderRadius.full,
+    position: 'relative',
+    marginBottom: spacing.sm,
+  },
+  resultFill: {
+    height: '100%',
+    backgroundColor: colors.accent.primary,
+    borderRadius: borderRadius.full,
+  },
+  resultMarker: {
+    position: 'absolute',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colors.accent.primary,
+    borderWidth: 2,
+    borderColor: colors.background.card,
+    top: -4,
+    marginLeft: -8,
+  },
+  resultLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.md,
+  },
+  resultValueLabel: {
+    ...typography.caption,
+    color: colors.text.secondary,
+  },
+  editButton: {
+    ...typography.bodySmall,
+    color: colors.accent.primary,
+    textAlign: 'center',
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: colors.overlay,
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: colors.background.primary,
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  modalTitle: {
+    ...typography.title,
+    color: colors.text.primary,
+  },
+  modalClose: {
+    fontSize: 24,
+    color: colors.text.tertiary,
+    padding: spacing.sm,
+  },
+  modalQuestion: {
+    ...typography.body,
+    color: colors.text.primary,
+    textAlign: 'center',
+    lineHeight: 26,
+    marginBottom: spacing.lg,
+  },
+  modalDimensionBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+  },
+  modalDimensionIcon: {
+    fontSize: 24,
+    marginRight: spacing.sm,
+  },
+  modalDimensionName: {
+    ...typography.subtitle,
+    color: colors.accent.primary,
+  },
+  modalSlider: {
+    marginBottom: spacing.xl,
   },
 });
