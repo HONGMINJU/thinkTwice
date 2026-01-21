@@ -71,23 +71,6 @@ export const SettingsScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>👤 프로필</Text>
-          <View style={styles.sectionContent}>
-            <SettingItem
-              icon="📝"
-              title="닉네임 설정"
-              subtitle="아직 설정되지 않음"
-              showArrow
-            />
-            <SettingItem
-              icon="🖼️"
-              title="프로필 이미지"
-              showArrow
-            />
-          </View>
-        </View>
-
-        <View style={styles.section}>
           <Text style={styles.sectionTitle}>🔔 알림</Text>
           <View style={styles.sectionContent}>
             <SettingItem
@@ -153,10 +136,6 @@ export const SettingsScreen: React.FC = () => {
             />
           </View>
         </View>
-
-        <TouchableOpacity style={styles.logoutButton}>
-          <Text style={styles.logoutText}>로그아웃</Text>
-        </TouchableOpacity>
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>생각해보면 (Think Twice)</Text>
@@ -231,17 +210,6 @@ const styles = StyleSheet.create({
   settingArrow: {
     fontSize: 20,
     color: colors.text.tertiary,
-  },
-  logoutButton: {
-    backgroundColor: colors.background.card,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    alignItems: 'center',
-    ...shadows.sm,
-  },
-  logoutText: {
-    ...typography.body,
-    color: colors.accent.secondary,
   },
   footer: {
     alignItems: 'center',
