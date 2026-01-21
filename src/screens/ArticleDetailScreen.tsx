@@ -96,6 +96,7 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({
   const [showModal, setShowModal] = useState(false);
   const [selectedValue, setSelectedValue] = useState(50);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   const { issueId } = route.params;
 
   const dimension = getDimensionById('tech_ethics');
@@ -122,7 +123,22 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({
   const handleSubmit = () => {
     setHasSubmitted(true);
     setShowModal(false);
+    // Show toast after selection
+    setShowToast(true);
+    // Auto-hide toast after 5 seconds
+    setTimeout(() => setShowToast(false), 5000);
     // TODO: 저장 로직
+  };
+
+  const getOppositeLabel = () => {
+    if (selectedValue < 50) return dimension?.rightValue.label;
+    return dimension?.leftValue.label;
+  };
+
+  const getOppositePercent = () => {
+    // Mock data - in real app, fetch from server
+    if (selectedValue < 50) return 48;
+    return 52;
   };
 
   const getResultLabel = () => {
@@ -333,6 +349,33 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({
           </View>
         </View>
       </Modal>
+
+      {/* 블라인드스팟 토스트 배너 */}
+      {showToast && (
+        <View style={styles.toastContainer}>
+          <View style={styles.toastContent}>
+            <Text style={styles.toastIcon}>🌈</Text>
+            <View style={styles.toastTextContainer}>
+              <Text style={styles.toastTitle}>다른 시각도 있어요</Text>
+              <Text style={styles.toastMessage}>
+                {getOppositePercent()}%는 '{getOppositeLabel()}'을 선택했어요
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.toastButton}
+              onPress={() => {
+                setShowToast(false);
+                // TODO: Navigate to opposite view or show more info
+              }}
+            >
+              <Text style={styles.toastButtonText}>알아보기</Text>
+            </TouchableOpacity>
+            <Pressable onPress={() => setShowToast(false)} style={styles.toastClose}>
+              <Text style={styles.toastCloseText}>✕</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -648,5 +691,57 @@ const styles = StyleSheet.create({
   },
   modalSlider: {
     marginBottom: spacing.xl,
+  },
+  // Toast styles
+  toastContainer: {
+    position: 'absolute',
+    bottom: spacing.xl,
+    left: spacing.md,
+    right: spacing.md,
+  },
+  toastContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    ...shadows.md,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.accent.primary,
+  },
+  toastIcon: {
+    fontSize: 24,
+    marginRight: spacing.sm,
+  },
+  toastTextContainer: {
+    flex: 1,
+  },
+  toastTitle: {
+    ...typography.label,
+    color: colors.text.primary,
+    marginBottom: 2,
+  },
+  toastMessage: {
+    ...typography.caption,
+    color: colors.text.secondary,
+  },
+  toastButton: {
+    backgroundColor: colors.accent.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
+    marginRight: spacing.sm,
+  },
+  toastButtonText: {
+    ...typography.caption,
+    color: colors.text.inverse,
+    fontWeight: '600',
+  },
+  toastClose: {
+    padding: spacing.xs,
+  },
+  toastCloseText: {
+    fontSize: 16,
+    color: colors.text.tertiary,
   },
 });

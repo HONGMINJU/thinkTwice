@@ -11,8 +11,11 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CompositeNavigationProp } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { IssueCard } from '../components/home/IssueCard';
-import { colors, typography, spacing } from '../styles';
+import { colors, typography, spacing, borderRadius, shadows } from '../styles';
 import { RootStackParamList, MainTabParamList, Issue } from '../types';
+
+// Mock data for unexplored perspectives count
+const UNEXPLORED_COUNT = 3;
 
 type HomeScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Home'>,
@@ -100,6 +103,29 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           바로 판단하지 말고, 한 번만 생각해보면 어떨까요?
         </Text>
 
+        {/* 나의 궤적 유도 카드 */}
+        {UNEXPLORED_COUNT > 0 && (
+          <TouchableOpacity
+            style={styles.nudgeCard}
+            onPress={() => navigation.navigate('Main', { screen: 'MyJourney' } as any)}
+            activeOpacity={0.8}
+          >
+            <View style={styles.nudgeIconContainer}>
+              <Text style={styles.nudgeIcon}>🎯</Text>
+              <View style={styles.nudgeBadge}>
+                <Text style={styles.nudgeBadgeText}>{UNEXPLORED_COUNT}</Text>
+              </View>
+            </View>
+            <View style={styles.nudgeContent}>
+              <Text style={styles.nudgeTitle}>탐색하지 않은 관점이 있어요</Text>
+              <Text style={styles.nudgeDescription}>
+                나의 궤적에서 다른 시각도 살펴보세요
+              </Text>
+            </View>
+            <Text style={styles.nudgeArrow}>›</Text>
+          </TouchableOpacity>
+        )}
+
         {MOCK_ISSUES.map((issue) => (
           <IssueCard
             key={issue.id}
@@ -149,5 +175,59 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     marginBottom: spacing.md,
     fontStyle: 'italic',
+  },
+  // 나의 궤적 유도 카드 스타일
+  nudgeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    ...shadows.sm,
+    borderWidth: 1,
+    borderColor: colors.accent.primary,
+  },
+  nudgeIconContainer: {
+    position: 'relative',
+    marginRight: spacing.md,
+  },
+  nudgeIcon: {
+    fontSize: 28,
+  },
+  nudgeBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -8,
+    backgroundColor: colors.semantic.error,
+    borderRadius: borderRadius.full,
+    minWidth: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  nudgeBadgeText: {
+    ...typography.caption,
+    color: colors.text.inverse,
+    fontWeight: '700',
+    fontSize: 10,
+  },
+  nudgeContent: {
+    flex: 1,
+  },
+  nudgeTitle: {
+    ...typography.body,
+    color: colors.text.primary,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  nudgeDescription: {
+    ...typography.caption,
+    color: colors.text.secondary,
+  },
+  nudgeArrow: {
+    fontSize: 24,
+    color: colors.accent.primary,
   },
 });

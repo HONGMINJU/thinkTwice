@@ -34,6 +34,34 @@ const RECENT_ISSUES = [
   { title: '주 52시간 유연화', result: '균형 55%' },
 ];
 
+// 아직 탐색하지 않은 관점 (블라인드 스팟)
+const UNEXPLORED_PERSPECTIVES = [
+  {
+    issueId: '1',
+    issueTitle: 'AI 저작권 논쟁',
+    dimensionId: 'tech_ethics',
+    myChoice: '혁신',
+    unexploredView: '권리 보호',
+    unexploredPercent: 48,
+  },
+  {
+    issueId: '2',
+    issueTitle: '정년 연장 법안',
+    dimensionId: 'generations',
+    myChoice: '연공서열',
+    unexploredView: '능력주의',
+    unexploredPercent: 65,
+  },
+  {
+    issueId: '4',
+    issueTitle: '차별금지법 논의',
+    dimensionId: 'culture',
+    myChoice: '다양성',
+    unexploredView: '전통',
+    unexploredPercent: 41,
+  },
+];
+
 export const MyJourneyScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
@@ -88,6 +116,53 @@ export const MyJourneyScreen: React.FC = () => {
         <AnalysisSummary scores={MOCK_SCORES} />
 
         <View style={styles.divider} />
+
+        {/* 블라인드 스팟: 탐색하지 않은 관점 */}
+        {UNEXPLORED_PERSPECTIVES.length > 0 && (
+          <>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionIcon}>🎯</Text>
+              <Text style={styles.sectionTitle}>탐색하지 않은 관점</Text>
+              <View style={styles.countBadge}>
+                <Text style={styles.countBadgeText}>{UNEXPLORED_PERSPECTIVES.length}</Text>
+              </View>
+            </View>
+
+            <Text style={styles.sectionDescription}>
+              다른 관점도 살펴보면 시야가 넓어져요
+            </Text>
+
+            {UNEXPLORED_PERSPECTIVES.map((item) => {
+              const dimension = VALUE_DIMENSIONS.find((d) => d.id === item.dimensionId);
+              return (
+                <TouchableOpacity key={item.issueId} style={styles.unexploredCard}>
+                  <View style={styles.unexploredHeader}>
+                    <Text style={styles.unexploredIcon}>{dimension?.icon}</Text>
+                    <Text style={styles.unexploredIssue}>{item.issueTitle}</Text>
+                  </View>
+                  <View style={styles.unexploredContent}>
+                    <View style={styles.unexploredChoice}>
+                      <Text style={styles.unexploredLabel}>나의 선택</Text>
+                      <Text style={styles.unexploredValue}>{item.myChoice}</Text>
+                    </View>
+                    <Text style={styles.unexploredArrow}>→</Text>
+                    <View style={styles.unexploredChoice}>
+                      <Text style={styles.unexploredLabel}>미탐색 관점</Text>
+                      <View style={styles.unexploredHighlight}>
+                        <Text style={styles.unexploredHighlightText}>{item.unexploredView}</Text>
+                      </View>
+                    </View>
+                  </View>
+                  <Text style={styles.unexploredHint}>
+                    {item.unexploredPercent}%의 사람들이 이 관점을 선택했어요
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+
+            <View style={styles.divider} />
+          </>
+        )}
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionIcon}>📝</Text>
@@ -196,5 +271,89 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: spacing.xl,
+  },
+  // 블라인드 스팟 섹션 스타일
+  countBadge: {
+    backgroundColor: colors.semantic.error,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    marginLeft: spacing.sm,
+  },
+  countBadgeText: {
+    ...typography.caption,
+    color: colors.text.inverse,
+    fontWeight: '600',
+    fontSize: 11,
+  },
+  sectionDescription: {
+    ...typography.bodySmall,
+    color: colors.text.secondary,
+    marginBottom: spacing.md,
+  },
+  unexploredCard: {
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    ...shadows.sm,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.accent.secondary,
+  },
+  unexploredHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  unexploredIcon: {
+    fontSize: 18,
+    marginRight: spacing.sm,
+  },
+  unexploredIssue: {
+    ...typography.body,
+    color: colors.text.primary,
+    fontWeight: '500',
+  },
+  unexploredContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.sm,
+  },
+  unexploredChoice: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  unexploredLabel: {
+    ...typography.caption,
+    color: colors.text.tertiary,
+    marginBottom: spacing.xs,
+  },
+  unexploredValue: {
+    ...typography.body,
+    color: colors.text.secondary,
+  },
+  unexploredArrow: {
+    fontSize: 18,
+    color: colors.text.tertiary,
+    marginHorizontal: spacing.sm,
+  },
+  unexploredHighlight: {
+    backgroundColor: colors.accent.secondary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
+  },
+  unexploredHighlightText: {
+    ...typography.body,
+    color: colors.text.inverse,
+    fontWeight: '600',
+  },
+  unexploredHint: {
+    ...typography.caption,
+    color: colors.text.tertiary,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
 });
