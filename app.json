@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "생각해보면",
+    "slug": "thinktwice",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FAFAFA"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.thinktwice.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FAFAFA"
+      },
+      "package": "com.thinktwice.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single",
+      "name": "생각해보면 - Think Twice",
+      "shortName": "ThinkTwice",
+      "description": "바로 판단하지 말고, 한 번만 생각해보면",
+      "backgroundColor": "#FAFAFA",
+      "themeColor": "#2A6B6B"
+    }
+  }
+}
