@@ -181,7 +181,7 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({
 
           <View style={styles.modeToggle}>
             <Text style={[styles.modeLabel, !isEssenceMode && styles.modeLabelActive]}>
-              각 언론사 입장
+              관점별 기사
             </Text>
             <Switch
               value={isEssenceMode}
@@ -197,7 +197,7 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({
           <Text style={styles.modeDescription}>
             {isEssenceMode
               ? '"프레임을 걷어내고 본질을 봅니다"'
-              : '"각 언론사의 시각을 비교해보세요"'}
+              : '"같은 이슈, 다른 관점을 비교해보세요"'}
           </Text>
         </View>
 
@@ -212,10 +212,36 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({
           </View>
         ) : (
           <View style={styles.articlesContainer}>
-            <Text style={styles.articlesTitle}>📰 언론사별 보도</Text>
-            <Text style={styles.articlesSubtitle}>
-              같은 이슈, 다른 시각을 비교해보세요
-            </Text>
+            <Text style={styles.articlesTitle}>📰 관점별 기사</Text>
+
+            {/* 관점별 기사 수 요약 */}
+            <View style={styles.stanceSummary}>
+              <View style={styles.stanceSummaryItem}>
+                <View style={[styles.stanceDot, { backgroundColor: colors.spectrum.left }]} />
+                <Text style={styles.stanceSummaryLabel}>
+                  {dimension?.leftValue.label}
+                </Text>
+                <Text style={styles.stanceSummaryCount}>
+                  {MOCK_ARTICLES.filter(a => a.stance === 'left').length}개
+                </Text>
+              </View>
+              <View style={styles.stanceSummaryItem}>
+                <View style={[styles.stanceDot, { backgroundColor: colors.text.secondary }]} />
+                <Text style={styles.stanceSummaryLabel}>균형</Text>
+                <Text style={styles.stanceSummaryCount}>
+                  {MOCK_ARTICLES.filter(a => a.stance === 'neutral').length}개
+                </Text>
+              </View>
+              <View style={styles.stanceSummaryItem}>
+                <View style={[styles.stanceDot, { backgroundColor: colors.spectrum.right }]} />
+                <Text style={styles.stanceSummaryLabel}>
+                  {dimension?.rightValue.label}
+                </Text>
+                <Text style={styles.stanceSummaryCount}>
+                  {MOCK_ARTICLES.filter(a => a.stance === 'right').length}개
+                </Text>
+              </View>
+            </View>
 
             {MOCK_ARTICLES.map((article) => (
               <TouchableOpacity
@@ -506,6 +532,35 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.text.secondary,
     marginBottom: spacing.md,
+  },
+  stanceSummary: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  stanceSummaryItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  stanceDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginBottom: spacing.xs,
+  },
+  stanceSummaryLabel: {
+    ...typography.caption,
+    color: colors.text.secondary,
+    marginBottom: 2,
+    fontSize: 11,
+  },
+  stanceSummaryCount: {
+    ...typography.subtitle,
+    color: colors.text.primary,
+    fontSize: 14,
   },
   articleCard: {
     backgroundColor: colors.background.card,
