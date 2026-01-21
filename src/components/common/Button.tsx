@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  TouchableOpacity,
+  Pressable,
   Text,
   StyleSheet,
   ActivityIndicator,
@@ -33,11 +33,13 @@ export const Button: React.FC<ButtonProps> = ({
   ];
 
   return (
-    <TouchableOpacity
-      style={buttonStyles}
+    <Pressable
+      style={({ pressed }) => [
+        ...buttonStyles,
+        pressed && styles.pressed,
+      ]}
       onPress={onPress}
       disabled={disabled || loading}
-      activeOpacity={0.7}
     >
       {loading ? (
         <ActivityIndicator
@@ -46,7 +48,7 @@ export const Button: React.FC<ButtonProps> = ({
       ) : (
         <Text style={textStyles}>{title}</Text>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
@@ -55,6 +57,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: borderRadius.md,
+    cursor: 'pointer',
+  } as ViewStyle,
+  pressed: {
+    opacity: 0.7,
   },
   primary: {
     backgroundColor: colors.accent.primary,
@@ -81,7 +87,8 @@ const styles = StyleSheet.create({
   },
   disabled: {
     backgroundColor: colors.border.light,
-  },
+    cursor: 'not-allowed',
+  } as ViewStyle,
   text: {
     ...typography.button,
   },
