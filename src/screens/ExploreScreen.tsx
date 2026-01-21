@@ -21,6 +21,18 @@ export const ExploreScreen: React.FC = () => {
     { id: '3', title: '차별금지법 논의', participants: 2341, dimension: 'culture' },
   ];
 
+  const DIVIDED_ISSUES = [
+    { id: '4', title: '기본소득제 도입', leftPercent: 48, rightPercent: 52, dimension: 'tax_welfare' },
+    { id: '5', title: '자사고 폐지 논란', leftPercent: 51, rightPercent: 49, dimension: 'education' },
+    { id: '6', title: '난민 수용 정책', leftPercent: 47, rightPercent: 53, dimension: 'global' },
+  ];
+
+  const NOT_PARTICIPATED = [
+    { dimension: 'safety_rights', issueCount: 5 },
+    { dimension: 'local', issueCount: 3 },
+    { dimension: 'gender', issueCount: 4 },
+  ];
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -83,22 +95,63 @@ export const ExploreScreen: React.FC = () => {
         <View style={styles.divider} />
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionIcon}>📌</Text>
-          <Text style={styles.sectionTitle}>가치별 이슈 모음</Text>
+          <Text style={styles.sectionIcon}>⚖️</Text>
+          <Text style={styles.sectionTitle}>의견이 팽팽한 이슈</Text>
         </View>
 
-        {VALUE_DIMENSIONS.slice(0, 5).map((dimension) => (
-          <TouchableOpacity key={dimension.id} style={styles.valueIssueItem}>
-            <Text style={styles.valueIssueIcon}>{dimension.icon}</Text>
-            <View style={styles.valueIssueContent}>
-              <Text style={styles.valueIssueName}>{dimension.name}</Text>
-              <Text style={styles.valueIssueValues}>
-                {dimension.leftValue.label} vs {dimension.rightValue.label}
-              </Text>
-            </View>
-            <Text style={styles.valueIssueArrow}>›</Text>
-          </TouchableOpacity>
-        ))}
+        <Text style={styles.sectionDescription}>
+          찬반이 엇갈리는 이슈들, 당신의 생각은?
+        </Text>
+
+        {DIVIDED_ISSUES.map((issue) => {
+          const dimension = VALUE_DIMENSIONS.find((d) => d.id === issue.dimension);
+          return (
+            <Card key={issue.id} style={styles.dividedCard}>
+              <View style={styles.issueBadge}>
+                <Text style={styles.issueBadgeIcon}>{dimension?.icon}</Text>
+                <Text style={styles.issueBadgeText}>{dimension?.nameEn}</Text>
+              </View>
+              <Text style={styles.issueTitle}>{issue.title}</Text>
+              <View style={styles.percentBar}>
+                <View style={[styles.percentLeft, { flex: issue.leftPercent }]}>
+                  <Text style={styles.percentText}>{issue.leftPercent}%</Text>
+                </View>
+                <View style={[styles.percentRight, { flex: issue.rightPercent }]}>
+                  <Text style={styles.percentText}>{issue.rightPercent}%</Text>
+                </View>
+              </View>
+            </Card>
+          );
+        })}
+
+        <View style={styles.divider} />
+
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionIcon}>🎯</Text>
+          <Text style={styles.sectionTitle}>아직 참여하지 않은 영역</Text>
+        </View>
+
+        <Text style={styles.sectionDescription}>
+          이 영역의 이슈에 참여하면 나의 가치 지도가 더 선명해져요
+        </Text>
+
+        {NOT_PARTICIPATED.map((item) => {
+          const dimension = VALUE_DIMENSIONS.find((d) => d.id === item.dimension);
+          return (
+            <TouchableOpacity key={item.dimension} style={styles.notParticipatedItem}>
+              <Text style={styles.notParticipatedIcon}>{dimension?.icon}</Text>
+              <View style={styles.notParticipatedContent}>
+                <Text style={styles.notParticipatedName}>{dimension?.name}</Text>
+                <Text style={styles.notParticipatedValues}>
+                  {dimension?.leftValue.label} vs {dimension?.rightValue.label}
+                </Text>
+              </View>
+              <View style={styles.issueCountBadge}>
+                <Text style={styles.issueCountText}>{item.issueCount}개 이슈</Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
@@ -226,7 +279,37 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.text.secondary,
   },
-  valueIssueItem: {
+  sectionDescription: {
+    ...typography.bodySmall,
+    color: colors.text.secondary,
+    marginBottom: spacing.md,
+  },
+  dividedCard: {
+    marginBottom: spacing.md,
+  },
+  percentBar: {
+    flexDirection: 'row',
+    height: 28,
+    borderRadius: borderRadius.sm,
+    overflow: 'hidden',
+    marginTop: spacing.sm,
+  },
+  percentLeft: {
+    backgroundColor: colors.spectrum.left,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  percentRight: {
+    backgroundColor: colors.spectrum.right,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  percentText: {
+    ...typography.caption,
+    color: colors.text.inverse,
+    fontWeight: '600',
+  },
+  notParticipatedItem: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.background.card,
@@ -235,25 +318,32 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     ...shadows.sm,
   },
-  valueIssueIcon: {
-    fontSize: 20,
+  notParticipatedIcon: {
+    fontSize: 24,
     marginRight: spacing.md,
   },
-  valueIssueContent: {
+  notParticipatedContent: {
     flex: 1,
   },
-  valueIssueName: {
+  notParticipatedName: {
     ...typography.body,
     color: colors.text.primary,
     marginBottom: 2,
   },
-  valueIssueValues: {
+  notParticipatedValues: {
     ...typography.caption,
     color: colors.text.tertiary,
   },
-  valueIssueArrow: {
-    fontSize: 20,
-    color: colors.text.tertiary,
+  issueCountBadge: {
+    backgroundColor: colors.accent.primary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
+  },
+  issueCountText: {
+    ...typography.caption,
+    color: colors.text.inverse,
+    fontWeight: '500',
   },
   bottomSpacing: {
     height: spacing.xl,
