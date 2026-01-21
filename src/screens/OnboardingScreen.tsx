@@ -3,13 +3,14 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
+  ScrollView,
   Dimensions,
-  Animated,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button } from '../components/common';
-import { colors, typography, spacing, borderRadius } from '../styles';
+import { colors, typography, spacing } from '../styles';
 import { RootStackParamList } from '../types';
 
 const { width } = Dimensions.get('window');
@@ -61,12 +62,13 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   navigation,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const flatListRef = useRef<FlatList>(null);
-  const scrollX = useRef(new Animated.Value(0)).current;
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const handleNext = () => {
     if (currentIndex < onboardingData.length - 1) {
-      flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
+      const nextIndex = currentIndex + 1;
+      scrollViewRef.current?.scrollTo({ x: nextIndex * width, animated: true });
+      setCurrentIndex(nextIndex);
     } else {
       navigation.replace('Main');
     }
@@ -76,40 +78,12 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     navigation.replace('Main');
   };
 
-  const renderItem = ({ item }: { item: OnboardingItem }) => (
-    <View style={styles.slide}>
-      <Text style={styles.icon}>{item.icon}</Text>
-      <Text style={styles.phase}>{item.description}</Text>
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.copy}>{item.copy}</Text>
-    </View>
-  );
-
-  const renderDot = (index: number) => {
-    const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
-    const scale = scrollX.interpolate({
-      inputRange,
-      outputRange: [0.8, 1.2, 0.8],
-      extrapolate: 'clamp',
-    });
-    const opacity = scrollX.interpolate({
-      inputRange,
-      outputRange: [0.4, 1, 0.4],
-      extrapolate: 'clamp',
-    });
-
-    return (
-      <Animated.View
-        key={index}
-        style={[
-          styles.dot,
-          {
-            transform: [{ scale }],
-            opacity,
-          },
-        ]}
-      />
-    );
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const newIndex = Math.round(offsetX / width);
+    if (newIndex !== currentIndex && newIndex >= 0 && newIndex < onboardingData.length) {
+      setCurrentIndex(newIndex);
+    }
   };
 
   return (
@@ -118,29 +92,36 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
         <Button title="건너뛰기" onPress={handleSkip} variant="outline" size="small" />
       </View>
 
-      <FlatList
-        ref={flatListRef}
-        data={onboardingData}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+      <ScrollView
+        ref={scrollViewRef}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: false }
-        )}
-        onMomentumScrollEnd={(event) => {
-          const newIndex = Math.round(
-            event.nativeEvent.contentOffset.x / width
-          );
-          setCurrentIndex(newIndex);
-        }}
-      />
+        onMomentumScrollEnd={handleScroll}
+        scrollEventThrottle={16}
+        style={styles.scrollView}
+      >
+        {onboardingData.map((item) => (
+          <View key={item.id} style={styles.slide}>
+            <Text style={styles.icon}>{item.icon}</Text>
+            <Text style={styles.phase}>{item.description}</Text>
+            <Text style={styles.title}>{item.title}</Text>
+            <Text style={styles.copy}>{item.copy}</Text>
+          </View>
+        ))}
+      </ScrollView>
 
       <View style={styles.footer}>
         <View style={styles.pagination}>
-          {onboardingData.map((_, index) => renderDot(index))}
+          {onboardingData.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.dot,
+                currentIndex === index && styles.dotActive,
+              ]}
+            />
+          ))}
         </View>
 
         <Button
@@ -163,6 +144,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     paddingTop: spacing.xl,
     alignItems: 'flex-end',
+  },
+  scrollView: {
+    flex: 1,
   },
   slide: {
     width,
@@ -205,7 +189,11 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.accent.primary,
+    backgroundColor: colors.border.light,
     marginHorizontal: spacing.xs,
+  },
+  dotActive: {
+    backgroundColor: colors.accent.primary,
+    transform: [{ scale: 1.2 }],
   },
 });
