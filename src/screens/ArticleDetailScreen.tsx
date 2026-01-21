@@ -97,6 +97,7 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({
   const [selectedValue, setSelectedValue] = useState(50);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [showBlindSpotModal, setShowBlindSpotModal] = useState(false);
   const { issueId } = route.params;
 
   const dimension = getDimensionById('tech_ethics');
@@ -365,7 +366,7 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({
               style={styles.toastButton}
               onPress={() => {
                 setShowToast(false);
-                // TODO: Navigate to opposite view or show more info
+                setShowBlindSpotModal(true);
               }}
             >
               <Text style={styles.toastButtonText}>알아보기</Text>
@@ -376,6 +377,92 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({
           </View>
         </View>
       )}
+
+      {/* 블라인드스팟 상세 모달 */}
+      <Modal
+        visible={showBlindSpotModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowBlindSpotModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.blindSpotModalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>🌈 다른 시각 알아보기</Text>
+              <Pressable onPress={() => setShowBlindSpotModal(false)}>
+                <Text style={styles.modalClose}>✕</Text>
+              </Pressable>
+            </View>
+
+            <View style={styles.blindSpotBadge}>
+              <Text style={styles.blindSpotBadgeText}>
+                '{getOppositeLabel()}' 관점
+              </Text>
+            </View>
+
+            <Text style={styles.blindSpotQuestion}>
+              왜 {getOppositePercent()}%의 사람들이{'\n'}이 관점을 선택했을까요?
+            </Text>
+
+            <View style={styles.blindSpotReasons}>
+              {selectedValue >= 50 ? (
+                <>
+                  <View style={styles.blindSpotReasonItem}>
+                    <Text style={styles.blindSpotReasonIcon}>💡</Text>
+                    <Text style={styles.blindSpotReasonText}>
+                      AI 기술이 빠르게 발전하는 상황에서 창작자의 생계가 위협받을 수 있어요
+                    </Text>
+                  </View>
+                  <View style={styles.blindSpotReasonItem}>
+                    <Text style={styles.blindSpotReasonIcon}>💡</Text>
+                    <Text style={styles.blindSpotReasonText}>
+                      학습 데이터로 사용된 원작에 대한 동의나 보상이 없었어요
+                    </Text>
+                  </View>
+                  <View style={styles.blindSpotReasonItem}>
+                    <Text style={styles.blindSpotReasonIcon}>💡</Text>
+                    <Text style={styles.blindSpotReasonText}>
+                      창작 생태계가 무너지면 장기적으로 AI 학습 데이터도 부족해질 수 있어요
+                    </Text>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <View style={styles.blindSpotReasonItem}>
+                    <Text style={styles.blindSpotReasonIcon}>💡</Text>
+                    <Text style={styles.blindSpotReasonText}>
+                      AI는 붓이나 카메라처럼 창작을 돕는 도구일 뿐이에요
+                    </Text>
+                  </View>
+                  <View style={styles.blindSpotReasonItem}>
+                    <Text style={styles.blindSpotReasonIcon}>💡</Text>
+                    <Text style={styles.blindSpotReasonText}>
+                      과도한 규제는 기술 발전과 국가 경쟁력을 저해할 수 있어요
+                    </Text>
+                  </View>
+                  <View style={styles.blindSpotReasonItem}>
+                    <Text style={styles.blindSpotReasonIcon}>💡</Text>
+                    <Text style={styles.blindSpotReasonText}>
+                      새로운 창작의 기회가 더 많은 사람에게 열릴 수 있어요
+                    </Text>
+                  </View>
+                </>
+              )}
+            </View>
+
+            <Text style={styles.blindSpotFooter}>
+              다른 관점을 이해한다고 해서{'\n'}내 생각이 바뀌는 건 아니에요 🙂
+            </Text>
+
+            <Button
+              title="이해했어요"
+              onPress={() => setShowBlindSpotModal(false)}
+              variant="primary"
+              size="large"
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -695,7 +782,7 @@ const styles = StyleSheet.create({
   // Toast styles
   toastContainer: {
     position: 'absolute',
-    bottom: spacing.xl,
+    top: spacing.xl,
     left: spacing.md,
     right: spacing.md,
   },
@@ -743,5 +830,63 @@ const styles = StyleSheet.create({
   toastCloseText: {
     fontSize: 16,
     color: colors.text.tertiary,
+  },
+  // BlindSpot Modal styles
+  blindSpotModalContent: {
+    backgroundColor: colors.background.primary,
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
+    maxHeight: '80%',
+  },
+  blindSpotBadge: {
+    backgroundColor: colors.accent.secondary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    alignSelf: 'center',
+    marginBottom: spacing.lg,
+  },
+  blindSpotBadgeText: {
+    ...typography.subtitle,
+    color: colors.text.inverse,
+  },
+  blindSpotQuestion: {
+    ...typography.body,
+    color: colors.text.primary,
+    textAlign: 'center',
+    lineHeight: 26,
+    marginBottom: spacing.lg,
+  },
+  blindSpotReasons: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  blindSpotReasonItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: spacing.md,
+  },
+  blindSpotReasonIcon: {
+    fontSize: 16,
+    marginRight: spacing.sm,
+    marginTop: 2,
+  },
+  blindSpotReasonText: {
+    ...typography.body,
+    color: colors.text.primary,
+    flex: 1,
+    lineHeight: 24,
+  },
+  blindSpotFooter: {
+    ...typography.caption,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginBottom: spacing.lg,
+    lineHeight: 20,
   },
 });
