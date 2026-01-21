@@ -76,7 +76,12 @@ export type RootStackParamList = {
   Main: undefined;
   ArticleDetail: { issueId: string };
   BalancePick: { issueId: string };
-  BlindSpot: { issueId: string };
+  BlindSpot: {
+    issueId: string;
+    oppositeLabel: string;
+    oppositePercent: number;
+    selectedValue: number;
+  };
   ValueSpectrum: { issueId: string };
 };
 

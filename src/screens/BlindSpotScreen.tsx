@@ -9,49 +9,49 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { Header, Button, Card } from '../components/common';
-import { colors, typography, spacing, borderRadius } from '../styles';
+import { colors, typography, spacing, borderRadius, shadows } from '../styles';
 import { RootStackParamList } from '../types';
+import { getDimensionById } from '../constants/valueDimensions';
 
 type BlindSpotScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'BlindSpot'>;
   route: RouteProp<RootStackParamList, 'BlindSpot'>;
 };
 
-const BLIND_SPOTS = [
-  {
-    id: '1',
-    title: '창작자 생계 문제',
-    content:
-      'AI 저작권 문제는 단순히 법적 권리의 문제가 아닙니다. 일러스트레이터, 작가 등 창작자들의 생계와 직결되어 있습니다. AI 학습 데이터로 사용된 원작자들에 대한 보상 체계도 함께 논의되어야 합니다.',
-  },
-  {
-    id: '2',
-    title: '글로벌 기술 경쟁',
-    content:
-      '한편으로 AI 규제가 너무 강해지면 국가 경쟁력에 영향을 줄 수 있다는 우려도 있습니다. 미국, 중국 등 주요국의 AI 정책과의 조화도 고려해야 할 사항입니다.',
-  },
-  {
-    id: '3',
-    title: '소비자 관점',
-    content:
-      'AI 창작물을 이용하는 소비자의 권리와 알 권리도 중요합니다. AI가 만든 콘텐츠임을 명시해야 하는지, 가격 차별화가 필요한지 등의 문제도 있습니다.',
-  },
+// 혁신 중시 관점의 이유들
+const INNOVATION_REASONS = [
+  'AI는 붓이나 카메라처럼 창작을 돕는 도구일 뿐',
+  '과도한 규제는 기술 발전과 국가 경쟁력 저해',
+  'AI를 통해 더 많은 사람에게 창작 기회 제공',
+];
+
+// 권리 보호 관점의 이유들
+const PROTECTION_REASONS = [
+  '창작자의 생계가 위협받을 수 있음',
+  '학습 데이터 사용에 대한 동의나 보상 부재',
+  '창작 생태계 붕괴 시 AI 발전에도 악영향',
 ];
 
 export const BlindSpotScreen: React.FC<BlindSpotScreenProps> = ({
   navigation,
   route,
 }) => {
-  const { issueId } = route.params;
+  const { oppositeLabel, oppositePercent, selectedValue } = route.params;
 
-  const handleNext = () => {
-    navigation.navigate('ValueSpectrum', { issueId });
-  };
+  const dimension = getDimensionById('tech_ethics');
+  const myPercent = 100 - oppositePercent;
+
+  // 사용자가 50 이상 선택 = 혁신 중시
+  const isInnovationSide = selectedValue >= 50;
+  const myLabel = isInnovationSide ? dimension?.leftValue.label : dimension?.rightValue.label;
+
+  const myReasons = isInnovationSide ? INNOVATION_REASONS : PROTECTION_REASONS;
+  const oppositeReasons = isInnovationSide ? PROTECTION_REASONS : INNOVATION_REASONS;
 
   return (
     <SafeAreaView style={styles.container}>
       <Header
-        title="시야 확장"
+        title="다른 시각 알아보기"
         showBack
         onBack={() => navigation.goBack()}
       />
@@ -61,35 +61,92 @@ export const BlindSpotScreen: React.FC<BlindSpotScreenProps> = ({
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.mainCopy}>
-          "미처 생각해보지 못했던{'\n'}새로운 시야가 여기 있습니다"
-        </Text>
-
-        <View style={styles.divider} />
-
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionIcon}>💡</Text>
-          <Text style={styles.sectionTitle}>이런 관점도 있어요</Text>
+        {/* 나의 위치 표시 */}
+        <View style={styles.positionContainer}>
+          <Text style={styles.positionTitle}>이 이슈에서 나의 위치</Text>
+          <View style={styles.spectrumBar}>
+            <View style={[styles.spectrumLeft, { flex: myPercent }]} />
+            <View style={[styles.spectrumRight, { flex: oppositePercent }]} />
+            <View
+              style={[
+                styles.positionMarker,
+                { left: `${selectedValue}%` }
+              ]}
+            />
+          </View>
+          <View style={styles.spectrumLabels}>
+            <Text style={styles.spectrumLabelLeft}>{dimension?.leftValue.label}</Text>
+            <Text style={styles.spectrumLabelRight}>{dimension?.rightValue.label}</Text>
+          </View>
         </View>
 
-        {BLIND_SPOTS.map((spot, index) => (
-          <Card key={spot.id} style={styles.spotCard}>
-            <View style={styles.spotHeader}>
-              <View style={styles.spotBadge}>
-                <Text style={styles.spotBadgeText}>Blind Spot #{index + 1}</Text>
+        <View style={styles.divider} />
+
+        {/* 양쪽 진영 비교 */}
+        <View style={styles.comparisonContainer}>
+          {/* 내 진영 */}
+          <View style={[styles.sideCard, styles.mySideCard]}>
+            <View style={styles.sideHeader}>
+              <Text style={styles.sideLabel}>나의 진영</Text>
+              <View style={styles.myBadge}>
+                <Text style={styles.badgeText}>ME</Text>
               </View>
             </View>
-            <Text style={styles.spotTitle}>{spot.title}</Text>
-            <Text style={styles.spotContent}>{spot.content}</Text>
-          </Card>
-        ))}
+            <Text style={styles.sideTitle}>{myLabel}</Text>
+            <Text style={styles.sidePercent}>{myPercent}%</Text>
+            <View style={styles.reasonsList}>
+              {myReasons.map((reason, index) => (
+                <View key={index} style={styles.reasonItem}>
+                  <Text style={styles.reasonBullet}>•</Text>
+                  <Text style={styles.reasonText}>{reason}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* VS */}
+          <View style={styles.vsContainer}>
+            <Text style={styles.vsText}>VS</Text>
+          </View>
+
+          {/* 반대 진영 */}
+          <View style={[styles.sideCard, styles.oppositeSideCard]}>
+            <View style={styles.sideHeader}>
+              <Text style={styles.sideLabel}>다른 진영</Text>
+              <View style={styles.newBadge}>
+                <Text style={styles.badgeText}>NEW</Text>
+              </View>
+            </View>
+            <Text style={styles.sideTitle}>{oppositeLabel}</Text>
+            <Text style={styles.sidePercent}>{oppositePercent}%</Text>
+            <View style={styles.reasonsList}>
+              {oppositeReasons.map((reason, index) => (
+                <View key={index} style={styles.reasonItem}>
+                  <Text style={styles.reasonBullet}>•</Text>
+                  <Text style={styles.reasonText}>{reason}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
 
         <View style={styles.divider} />
+
+        {/* 푸터 메시지 */}
+        <View style={styles.footerCard}>
+          <Text style={styles.footerEmoji}>🙂</Text>
+          <Text style={styles.footerText}>
+            다른 관점을 이해한다고 해서{'\n'}내 생각이 바뀌는 건 아니에요
+          </Text>
+          <Text style={styles.footerSubtext}>
+            다양한 시각을 알면 더 깊이 생각할 수 있어요
+          </Text>
+        </View>
 
         <View style={styles.actionContainer}>
           <Button
-            title="다른 사람들은 어떻게 생각할까?"
-            onPress={handleNext}
+            title="이해했어요"
+            onPress={() => navigation.goBack()}
             variant="primary"
             size="large"
           />
@@ -110,61 +167,178 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: spacing.md,
   },
-  mainCopy: {
-    ...typography.title,
+  // 나의 위치
+  positionContainer: {
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    ...shadows.sm,
+  },
+  positionTitle: {
+    ...typography.subtitle,
     color: colors.text.primary,
     textAlign: 'center',
-    lineHeight: 28,
-    marginVertical: spacing.lg,
-    fontStyle: 'italic',
+    marginBottom: spacing.md,
+  },
+  spectrumBar: {
+    height: 12,
+    borderRadius: borderRadius.full,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    position: 'relative',
+    marginBottom: spacing.sm,
+  },
+  spectrumLeft: {
+    backgroundColor: colors.spectrum.left,
+  },
+  spectrumRight: {
+    backgroundColor: colors.spectrum.right,
+  },
+  positionMarker: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: colors.background.card,
+    borderWidth: 3,
+    borderColor: colors.accent.primary,
+    top: -4,
+    marginLeft: -10,
+  },
+  spectrumLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  spectrumLabelLeft: {
+    ...typography.caption,
+    color: colors.spectrum.left,
+    fontWeight: '600',
+  },
+  spectrumLabelRight: {
+    ...typography.caption,
+    color: colors.spectrum.right,
+    fontWeight: '600',
   },
   divider: {
     height: 1,
     backgroundColor: colors.border.light,
-    marginVertical: spacing.md,
+    marginVertical: spacing.lg,
   },
-  sectionHeader: {
+  // 양쪽 진영 비교
+  comparisonContainer: {
     flexDirection: 'row',
+    alignItems: 'stretch',
+  },
+  sideCard: {
+    flex: 1,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    ...shadows.sm,
+  },
+  mySideCard: {
+    backgroundColor: colors.background.card,
+    borderWidth: 2,
+    borderColor: colors.spectrum.left,
+    marginRight: spacing.xs,
+  },
+  oppositeSideCard: {
+    backgroundColor: colors.background.card,
+    borderWidth: 2,
+    borderColor: colors.spectrum.right,
+    marginLeft: spacing.xs,
+  },
+  sideHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing.xs,
   },
-  sectionIcon: {
-    fontSize: 20,
-    marginRight: spacing.sm,
+  sideLabel: {
+    ...typography.caption,
+    color: colors.text.tertiary,
   },
-  sectionTitle: {
-    ...typography.subtitle,
-    color: colors.text.primary,
-  },
-  spotCard: {
-    marginBottom: spacing.md,
-  },
-  spotHeader: {
-    marginBottom: spacing.sm,
-  },
-  spotBadge: {
-    backgroundColor: colors.accent.tertiary,
+  myBadge: {
+    backgroundColor: colors.spectrum.left,
     paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
+    paddingVertical: 2,
     borderRadius: borderRadius.sm,
-    alignSelf: 'flex-start',
   },
-  spotBadgeText: {
+  newBadge: {
+    backgroundColor: colors.spectrum.right,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.sm,
+  },
+  badgeText: {
     ...typography.caption,
     color: colors.text.inverse,
-    fontWeight: '600',
+    fontWeight: '700',
+    fontSize: 10,
   },
-  spotTitle: {
+  sideTitle: {
     ...typography.subtitle,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
+  },
+  sidePercent: {
+    ...typography.headline,
     color: colors.text.primary,
     marginBottom: spacing.sm,
   },
-  spotContent: {
-    ...typography.body,
+  vsContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing.xs,
+  },
+  vsText: {
+    ...typography.caption,
+    color: colors.text.tertiary,
+    fontWeight: '700',
+  },
+  reasonsList: {
+    marginTop: spacing.xs,
+  },
+  reasonItem: {
+    flexDirection: 'row',
+    marginBottom: spacing.xs,
+  },
+  reasonBullet: {
+    ...typography.caption,
+    color: colors.text.tertiary,
+    marginRight: spacing.xs,
+  },
+  reasonText: {
+    ...typography.caption,
     color: colors.text.secondary,
+    flex: 1,
+    lineHeight: 18,
+  },
+  // 푸터
+  footerCard: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  footerEmoji: {
+    fontSize: 32,
+    marginBottom: spacing.sm,
+  },
+  footerText: {
+    ...typography.body,
+    color: colors.text.primary,
+    textAlign: 'center',
     lineHeight: 24,
+    marginBottom: spacing.xs,
+  },
+  footerSubtext: {
+    ...typography.caption,
+    color: colors.text.secondary,
+    textAlign: 'center',
   },
   actionContainer: {
     marginTop: spacing.md,
+    marginBottom: spacing.xl,
   },
 });
